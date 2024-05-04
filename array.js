@@ -1,5 +1,3 @@
-//pepepep
-
 var pagrecaptcha = new Array(
 	"6LePTyoUAAAAADPttQg1At44EFCygqxZYzgleaKp",
 	"6Ld0LhoUAAAAAGz9Gbw0GjV4l501Odb4w6Dt-8Zj",
