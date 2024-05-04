@@ -1,7 +1,7 @@
 //pepepep
 
 var pagrecaptcha = new Array(
-	"6LePTyoUAAAAADPttQg1At44EFCygqxZYzgleaKp",
+	"6LePTyoUAAAAADPttQg1At44EFCygqxZYzgleaKpxxxxx",
 	"6Ld0LhoUAAAAAGz9Gbw0GjV4l501Odb4w6Dt-8Zj",
 	"6Lc-kZkcAAAAAFHunIfhZWD3Igx02nG0RnqErEdT",
 	"6LenjUIgAAAAAEC38mbBc0MurhJgNuvzZlKmr3Xi",
