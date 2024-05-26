@@ -4241,7 +4241,7 @@ Anti.errors = {
 
             case 'not_verified':
                 Anti.errors.checkErrorRemoval
-                Anti.dialogsManager.message("Error record not found.");
+                Anti.dialogsManager.message("Error record has been removed. 01");
                 Anti.errors.remove();
                 Anti.errors.load();
                 
