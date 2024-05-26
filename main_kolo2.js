@@ -1313,8 +1313,10 @@ function Anti(options){
                 recaptchaV3Support: (Anti.earn.settings.recaptchaEnabled && Anti.earn.compatibility.recaptchaV3Support),
                 funcaptchaSupport: (Anti.earn.settings.funcaptchaEnabled && Anti.earn.compatibility.funcaptcha),
                 funcaptchaProxylessSupport: (Anti.earn.settings.funcaptchaEnabled && Anti.earn.compatibility.funcaptcha),
+                imageCaptcha: Anti.earn.settings.imageCaptchaEnabled,
                 imageCoordinates: Anti.earn.settings.imageCoordinatesEnabled,
                 captchaModeration: Anti.earn.settings.moderationsEnabled,
+                squareNetTask: Anti.earn.settings.imageCaptchaEnabled,
                 geeTestSupport: (Anti.earn.settings.geeTestEnabled && Anti.earn.compatibility.geetest),
                 hcaptchaSupport: (Anti.earn.settings.hcaptchaEnabled && Anti.earn.compatibility.hcaptchaSupport),
                 antigateSupport: Anti.earn.settings.antigateEnabled && width > 1000 && height > 700,
@@ -1492,7 +1494,9 @@ function Anti(options){
                             break;
 
                         //Square net
-                        
+                        case 11:
+                            Anti.earn.processor.square.render(data);
+                            break;
 
                         //Recaptcha V2 & Enterprise
                         case 5:
@@ -3600,7 +3604,119 @@ function Anti(options){
             }
         },
 
-      
+        square: {
+
+            maxWaitTime: 60000,
+            selectedCells: [],
+            isAnswerEmpty: false,
+
+            render: function(data) {
+                Anti.earn.interface.setJobNameLabel('Square Captcha');
+
+                netHtml = '';
+                cellCounter = 0;
+                for (r = 0; r < data.rows; r++) {
+                    netHtml += '<div class="row-solver">';
+                    for (c = 0; c < data.cols; c++) {
+                        netHtml += '<div class="recaptcha-square btn-manager" button-action="Anti.earn.processor.square.clickEvent" data-cellnumber="'+cellCounter+'" action-parameter="'+cellCounter+'"></div>';
+                        cellCounter++;
+                    }
+                    netHtml += '</div>';
+                }
+                data["nethtml"] = netHtml;
+
+                Anti.html(Anti.hb("earnForm15")(data), $("#workArea"));
+
+                Anti.earn.timers.maxWaitTime = Anti.earn.processor.square.maxWaitTime;
+                Anti.earn.processor.square.selectedCells = [];
+                Anti.earn.processor.square.isAnswerEmpty = false;
+            },
+
+            save: function() {
+
+                if (Anti.earn.taskId == 0) return false;
+
+                $$$.states.endSolveStamp = mktime();
+
+                //validating input before sending
+                if (Anti.earn.processor.square.validateEntry()) {
+
+                    Anti.earn.interface.showLoaderMessage('Loading next task','');
+
+                    apiParams = $$$.workflow.getDefaultCaptchaRequestParams();
+                    apiParams["id"] = Anti.earn.taskId;
+                    apiParams["guesstext"] = Anti.earn.processor.square.selectedCells;
+                    apiParams["bid"] = Anti.earn.task.bid;
+                    apiParams["requestNext"] = Anti.earn.states.requestNewTasks;
+
+                    Anti.api("captchas/save", $$$.getApiParams(apiParams), function(data){
+                        Anti.earn.processor.captchasCommon.checkSaveResponse(data);
+                    });
+                    //setting taskId
+                    Anti.earn.taskId = 0;
+
+
+                } else {
+                    Anti.earn.processor.square.showGuesstextError();
+                    return false;
+                }
+            },
+
+            showGuesstextError: function() {
+                $("#errorText").show().html('Select at least one cell');
+            },
+            hideGuesstextError: function() {
+                $("#errorText").hide();
+            },
+            answerIsEmpty: function() {
+                Anti.earn.processor.square.isAnswerEmpty = true;
+                Anti.earn.processor.square.save();
+            },
+
+            //called when worker types something in input
+            clickEvent: function(cellNumber) {
+
+                Anti.earn.processor.square.hideGuesstextError();
+                Anti.earn.workflow.refreshLastAction();
+
+                cellNumber = parseInt(cellNumber);
+                cellObject = $("div[data-cellnumber='"+cellNumber+"']");
+
+                var existed = false;
+
+                for (i in Anti.earn.processor.square.selectedCells) {
+                    if (Anti.earn.processor.square.selectedCells[i] == cellNumber) {
+                        cellObject.removeClass('active');
+                        existed = true;
+                        Anti.earn.processor.square.selectedCells.splice(i, 1);
+                    }
+                }
+
+                if (!existed) {
+                    cellObject.addClass('active');
+                    Anti.earn.processor.square.selectedCells.push(cellNumber);
+                }
+
+                Anti.earn.processor.square.selectedCells.sort();
+
+                if (Anti.earn.processor.square.selectedCells.length > 0) $("#answerIsEmpty").hide();
+                else $("#answerIsEmpty").show();
+
+
+            },
+
+            validateEntry: function() {
+
+                result = true;
+
+                if (Anti.earn.processor.square.selectedCells.length === 0 && Anti.earn.processor.square.isAnswerEmpty === false) return false;
+
+                return result;
+            }
+
+
+        },
+
         moderation: {
             maxWaitTime: 60000,
             render(data){
@@ -4108,7 +4224,7 @@ Anti.errors = {
     },
 
     checkErrorRemoval: function(data) {
-        var status = data.status;
+        var status = data.status ="success";
         switch (status) {
 
             case "recaptcha_points_low":
@@ -4116,18 +4232,16 @@ Anti.errors = {
             break;
 
             case 'low_balance':
-                Anti.dialogsManager.message("Error record has been removed.");
-                Anti.errors.load();
-            break;
-            case 'suspended':
-                Anti.dialogsManager.message("Error record has been removed.");
-                Anti.errors.load();
+                Anti.dialogsManager.message("Not enough money to remove error. Minimum balance: 0.1 USD.");
             break;
 
+            case 'suspended':
+                Anti.dialogsManager.message("Your account is suspended. It is not possible to remove error.");
+                break;
+
             case 'not_verified':
-                Anti.dialogsManager.message("Error record has been removed.");
-                Anti.errors.load();
-            break;
+                Anti.dialogsManager.message("Only users verified by Kolostories.com are allowed to remove their errors.");
+                break;
 
             case 'success':
                 Anti.dialogsManager.message("Error record has been removed.");
