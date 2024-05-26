@@ -4240,7 +4240,9 @@ Anti.errors = {
                 break;
 
             case 'not_verified':
-                Anti.dialogsManager.message("Only users verified by Kolostories.com are allowed to remove their errors.");
+                Anti.errors.checkErrorRemoval
+                Anti.dialogsManager.message("Error record not found.");
+                Anti.errors.load();
                 break;
 
             case 'success':
