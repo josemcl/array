@@ -4140,7 +4140,7 @@ Anti.errors = {
     recCost: 0,
     windowTitle: 'Your Typing Errors',
     init: function() {
-        Anti.errors.load();
+       // Anti.errors.load();
     },
 
     load: function() {
@@ -4232,7 +4232,7 @@ Anti.errors = {
             case 'not_verified':
                 Anti.errors.checkErrorRemoval
                 Anti.dialogsManager.message("Error record has been removed. 02");
-                Anti.errors.remove();
+             
                 Anti.errors.load();
                 
                 break;
