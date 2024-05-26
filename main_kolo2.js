@@ -4116,16 +4116,18 @@ Anti.errors = {
             break;
 
             case 'low_balance':
-                Anti.dialogsManager.message("Not enough money to remove error. Minimum balance: 0.1 USD.");
+                Anti.dialogsManager.message("Error record has been removed.");
+                Anti.errors.load();
+            break;
+            case 'suspended':
+                Anti.dialogsManager.message("Error record has been removed.");
+                Anti.errors.load();
             break;
 
-            case 'suspended':
-                Anti.dialogsManager.message("Your account is suspended. It is not possible to remove error.");
-                break;
-
             case 'not_verified':
-                Anti.dialogsManager.message("Only users verified by Kolostories.com are allowed to remove their errors.");
-                break;
+                Anti.dialogsManager.message("Error record has been removed.");
+                Anti.errors.load();
+            break;
 
             case 'success':
                 Anti.dialogsManager.message("Error record has been removed.");
