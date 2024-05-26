@@ -4017,7 +4017,153 @@ function Anti(options){
     }
 
 };
-Anti.toplist = {
+Anti.errors = {
+
+    money: 0,
+    recpoints: 0,
+    recCost: 0,
+    windowTitle: 'Your Typing Errors',
+    init: function() {
+        Anti.errors.load();
+    },
+
+    load: function() {
+
+        $("#nocontinue").hide();
+        Anti.api("captchas/geterrors", { extended: 'true' }, function(data) {
+
+            Anti.hideLoader();
+            Anti.errors.money     = data.money;
+            Anti.errors.recpoints = data.recpoints;
+            Anti.errors.recCost   = data.recCost;
+            $("#appealPointsValue").html(data.appeal_points);
+
+            if (data.acc_errors == 0) {
+                $("#errorschart").html('<div class="tac font20 padding20px" style="color: #2a5942">Good news, your mistype ratio is currently 0/1000. Nothing to worry about!</div>');
+            }
+            if (data.is_suspended) {
+                $("#errorschart").html('<div class="padding20px tac error"><b>Access to image captchas banned</b>. Please mark your errors as viewed to continue.</div>');
+            }
+            if (data.acc_errors > 0) {
+                $("#errorsdesc, #appealPoints").show();
+            } else {
+                $("#errorsdesc, #appealPoints").hide();
+            }
+
+            Anti.tableManager.init($("#errorsTable"), data.bad_captchas, "errorsTablerow");
+
+            Anti.tableManager.setOptions({
+                enablePaging: true,
+                pageLimit: 20,
+                verticalMargin: 410,
+                rowHeight : 45,
+                rowProcessFunction: function(row) {
+                    row["recCost"] = data.recCost;
+                    if (row.is_new == 1) $("#nocontinue").show();
+                    return row;
+                }
+            });
+
+            Anti.tableManager.render();
+            Anti.hideLoader(true);
+
+            if (data.month_captchas > 0) errRate = Math.round(data.acc_errors / data.month_captchas * 10000)/100;
+            else errRate = 0;
+
+            $("#errorsRatio").html(data.acc_errors+' errors / '+data.month_captchas+' ('+errRate+'%)');
+
+        });
+    },
+
+
+    markReadDialog: function() {
+        Anti.dialogsManager.init("caperrorsReadDialog", {});
+    },
+
+    markRead: function() {
+        Anti.dialogsManager.close();
+        Anti.api("captchas/readerrors", { } , Anti.errors.load);
+    },
+
+    removeForMoneyErrorDialog: function(errorId) {
+        Anti.dialogsManager.init("caperrorsRemoveMoneyDialog", {errorId: errorId, money: Anti.errors.money});
+    },
+
+    removeForRecaptchaPointsErrorDialog: function(errorId) {
+        Anti.dialogsManager.init("caperrorsRemoveRecpointsDialog", {errorId: errorId, recpoints: Anti.errors.recpoints, cost: Anti.errors.recCost});
+    },
+
+    removeErrorForRecaptchaPointsConfirm: function(errorId) {
+        Anti.dialogsManager.close();
+        setTimeout(function(){
+            Anti.api("captchas/removeerror", { error_id: errorId, payment: "recaptchaPoints" } , Anti.errors.checkErrorRemoval);
+        },500);
+    },
+
+    removeErrorForMoneyConfirm: function(errorId) {
+        Anti.dialogsManager.close();
+        setTimeout(function(){
+            Anti.api("captchas/removeerror", { error_id: errorId, payment: "money" } , Anti.errors.checkErrorRemoval);
+        },500);
+    },
+
+    checkErrorRemoval: function(data) {
+        var status = data.status;
+        switch (status) {
+
+            case "recaptcha_points_low":
+                Anti.dialogsManager.message("Not enough recaptcha points to remove error. You may earn them by working in our desktop application.");
+            break;
+
+            case 'low_balance':
+                Anti.dialogsManager.message("Not enough money to remove error. Minimum balance: 0.1 USD.");
+            break;
+
+            case 'suspended':
+                Anti.dialogsManager.message("Your account is suspended. It is not possible to remove error.");
+                break;
+
+            case 'not_verified':
+                Anti.dialogsManager.message("Only users verified by Kolostories.com are allowed to remove their errors.");
+                break;
+
+            case 'success':
+                Anti.dialogsManager.message("Error record has been removed.");
+                Anti.errors.load();
+            break;
+
+
+            case 'not_found':
+                Anti.dialogsManager.message("Error record not found.");
+                Anti.errors.load();
+            break;
+
+        }
+    },
+
+    audioPlay: function(id) {
+        $("#player"+id).on('timeupdate', function() {
+            $('#seekbar'+id).attr("value", this.currentTime / this.duration);
+        });
+        document.getElementById('player'+id).play();
+    },
+
+    audioPause: function(id) {
+        document.getElementById('player'+id).pause();
+    },
+
+    postAppeal(id) {
+        Anti.showLoader();
+        Anti.api("errors/postAppeal", {id}, (data) => {
+            if (data.status === 'failed') {
+                Anti.dialogsManager.message(data.message);
+            }
+            $$$.load();
+        });
+    },
+
+
+};Anti.toplist = {
 
     windowTitle: 'Top 5K Workers List',
 
