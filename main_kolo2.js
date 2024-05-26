@@ -81,7 +81,7 @@ function copyToClipboard(value) {
   $temp.remove();
 }
 
-function A(options){
+function Anti(options){
 
 
     $("#loadingDiv").html('starting framework..');
