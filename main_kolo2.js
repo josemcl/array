@@ -4154,19 +4154,9 @@ Anti.errors = {
             Anti.errors.recCost   = data.recCost;
             $("#appealPointsValue").html(data.appeal_points);
 
-            if (data.acc_errors == 0) {
-                $("#errorschart").html('<div class="tac font20 padding20px" style="color: #2a5942">Good news, your mistype ratio is currently 0/1000. Nothing to worry about!</div>');
-            }
-            if (data.is_suspended) {
-                $("#errorschart").html('<div class="padding20px tac error"><b>Access to image captchas banned</b>. Please mark your errors as viewed to continue.</div>');
-            }
-            if (data.acc_errors > 0) {
-                $("#errorsdesc, #appealPoints").show();
-            } else {
-                $("#errorsdesc, #appealPoints").hide();
-            }
+            
 
-            Anti.tableManager.init($("#errorsTable"), data.bad_captchas, "errorsTablerow");
+            Anti.tableManager.init($("#errorsTable"), data, "errorsTablerow");
 
             Anti.tableManager.setOptions({
                 enablePaging: true,
