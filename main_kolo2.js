@@ -4017,8 +4017,6 @@ function Anti(options){
     }
 
 };
-
-
 Anti.toplist = {
 
     windowTitle: 'Top 5K Workers List',
