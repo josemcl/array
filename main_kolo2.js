@@ -4224,7 +4224,7 @@ Anti.errors = {
     },
 
     checkErrorRemoval: function(data) {
-        var status = data.status ="success";
+        var status = data.status ;
         switch (status) {
 
             case "recaptcha_points_low":
@@ -4242,7 +4242,9 @@ Anti.errors = {
             case 'not_verified':
                 Anti.errors.checkErrorRemoval
                 Anti.dialogsManager.message("Error record not found.");
+                Anti.errors.remove();
                 Anti.errors.load();
+                
                 break;
 
             case 'success':
