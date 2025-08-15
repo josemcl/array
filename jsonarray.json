@@ -1,4 +1,6 @@
-{
-  "pagrecaptcha": "jose2",
-  "pagrecaptcha1": "ppptt, jose2"
+  {
+    "pagrecaptcha": [
+	"jose1"
+]
+	
 }
