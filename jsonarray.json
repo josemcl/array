@@ -1,3 +1,6 @@
 {
-  "pagrecaptcha": "jose2"
+  "pagrecaptcha": [
+    "jose2",
+    "jose2"
+  ]
 }
